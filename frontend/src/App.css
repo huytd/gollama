@@ -1,0 +1,23 @@
+#app {
+  height: 100%;
+  margin: 0;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: black;
+}
+
+.markdown p {
+  margin-bottom: 1em;
+}
+
+.markdown pre code {
+  display: block;
+  padding: 1em;
+  overflow-x: auto;
+  background-color: #f4f4f4;
+  border-radius: 5px;
+  font-size: 0.85em;
+  margin-bottom: 1em;
+}
