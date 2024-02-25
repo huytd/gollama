@@ -6,6 +6,14 @@ export function GetClipboardText() {
   return window['go']['main']['App']['GetClipboardText']();
 }
 
+export function GetLLMConfig() {
+  return window['go']['main']['App']['GetLLMConfig']();
+}
+
+export function SetLLMConfig(arg1, arg2, arg3) {
+  return window['go']['main']['App']['SetLLMConfig'](arg1, arg2, arg3);
+}
+
 export function StartLLMStream(arg1) {
   return window['go']['main']['App']['StartLLMStream'](arg1);
 }

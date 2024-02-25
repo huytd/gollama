@@ -4,36 +4,23 @@ import (
 	"context"
 	"fmt"
 
+	"encoding/json"
+
 	openai "github.com/sashabaranov/go-openai"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 	"golang.design/x/clipboard"
 )
 
-type LLMChatMessage struct {
-	Role    string `json:"role"`
-	Content string `json:"content"`
-}
-
-type LLMRequestPayload struct {
-	Model    string           `json:"model"`
-	Messages []LLMChatMessage `json:"messages"`
-}
-
-type LLMResponsePayload struct {
-	Choices []struct {
-		Message struct {
-			Role    string `json:"role"`
-			Content string `json:"content"`
-		} `json:"message"`
-	} `json:"choices"`
+type LLMConfig struct {
+	APIUrl   string
+	APIModel string
+	APIKey   string
 }
 
 // App struct
 type App struct {
-	ctx      context.Context
-	apiUrl   string
-	apiModel string
-	apiKey   string
+	ctx       context.Context
+	llmConfig LLMConfig
 }
 
 // NewApp creates a new App application struct
@@ -45,9 +32,26 @@ func NewApp() *App {
 // so we can call the runtime methods
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
-	a.apiUrl = "http://localhost:11434/v1"
-	a.apiModel = "mistral:latest"
-	a.apiKey = "ollama"
+	a.llmConfig = LLMConfig{
+		APIUrl:   "http://localhost:11434/v1",
+		APIModel: "mistral:latest",
+		APIKey:   "ollama",
+	}
+}
+
+func (a *App) GetLLMConfig() string {
+	configJSON, err := json.Marshal(a.llmConfig)
+	if err != nil {
+		return "{}"
+	}
+	return string(configJSON)
+
+}
+
+func (a *App) SetLLMConfig(apiUrl string, apiKey string, apiModel string) {
+	a.llmConfig.APIUrl = apiUrl
+	a.llmConfig.APIKey = apiKey
+	a.llmConfig.APIModel = apiModel
 }
 
 // Greet returns a greeting for the given name
@@ -60,14 +64,14 @@ func (a *App) GetClipboardText() string {
 }
 
 func (a *App) StartLLMStream(prompt string) {
-	config := openai.DefaultConfig(a.apiKey)
-	config.BaseURL = a.apiUrl
+	config := openai.DefaultConfig(a.llmConfig.APIKey)
+	config.BaseURL = a.llmConfig.APIUrl
 	client := openai.NewClientWithConfig(config)
 
 	fmt.Println("Config", config.BaseURL)
 
 	req := openai.ChatCompletionRequest{
-		Model: a.apiModel,
+		Model: a.llmConfig.APIModel,
 		Messages: []openai.ChatCompletionMessage{
 			{
 				Role:    openai.ChatMessageRoleUser,

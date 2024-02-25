@@ -4,6 +4,8 @@ import { GetClipboardText, StartLLMStream } from "../wailsjs/go/main/App";
 import { EventsOn } from "../wailsjs/runtime";
 import { useHotkeys } from "react-hotkeys-hook";
 import Markdown from "react-markdown";
+import { Link, useNavigate } from "react-router-dom";
+import { IconGear, IconPaste, IconTrashcan } from "./Icons";
 
 function App() {
   const [clipboardText, setClipboardText] = useState("");
@@ -23,7 +25,7 @@ function App() {
   );
 
   useHotkeys(
-    "mod+r",
+    "mod+k",
     () => {
       if (clipboardText.length) {
         setClipboardText("");
@@ -84,7 +86,7 @@ function App() {
             Thinking...
           </div>
         ) : (
-          <div className="px-2 py-2 rounded-md bg-white text-black focus:outline-none ring-2 ring-gray-300 focus:ring-blue-500 flex-grow overflow-y-auto markdown">
+          <div className="px-2 py-2 rounded-md bg-white text-black focus:outline-none ring-2 ring-gray-300 focus:ring-blue-500 flex-grow overflow-y-auto markdown no-drag">
             <Markdown>{answer}</Markdown>
             <span id="scroll-bottom-mark" ref={scrollBottomMark}></span>
           </div>
@@ -105,35 +107,46 @@ function App() {
 
   return (
     <div id="app">
-      <div>
-        With context:{" "}
-        <span className="text-xs rounded-md bg-gray-200 text-gray-800 px-2 py-1">
-          {clipboardText.length
-            ? `"${clipboardText.substring(0, 50)}..."`
-            : "<empty>"}
-        </span>{" "}
-        {clipboardText.length ? (
-          <button
-            className="px-2 py-1 rounded-md bg-red-400 text-white text-xs"
-            onClick={() => setClipboardText("")}
-          >
-            clear
-          </button>
-        ) : (
-          <button
-            className="px-2 py-1 rounded-md bg-green-500 text-white text-xs"
-            onClick={() => getTextFromClipboard()}
-          >
-            add from clipboard
-          </button>
-        )}
+      <div className="flex items-center justify-between">
+        <div>
+          With context:{" "}
+          <span className="text-xs rounded-md bg-gray-200 text-gray-800 px-2 py-1">
+            {clipboardText.length
+              ? `"${clipboardText.substring(0, 40)}..."`
+              : "<empty>"}
+          </span>{" "}
+          {clipboardText.length ? (
+            <button
+              className="px-2 py-1 rounded-md bg-red-400 text-white text-xs"
+              onClick={() => setClipboardText("")}
+            >
+              <div className="flex gap-1 items-center">
+                <IconTrashcan />
+                Clear
+              </div>
+            </button>
+          ) : (
+            <button
+              className="px-2 py-1 rounded-md bg-green-500 text-white text-xs"
+              onClick={() => getTextFromClipboard()}
+            >
+              <div className="flex gap-1 items-center">
+                <IconPaste />
+                Add clipboard
+              </div>
+            </button>
+          )}
+        </div>
+        <Link to="/settings">
+          <IconGear />
+        </Link>
       </div>
       <textarea
         autoFocus={true}
         value={promptText}
         onChange={(e) => setPromptText(e.target.value)}
         placeholder="Enter a custom prompt here..."
-        className="px-2 py-2 rounded-md bg-white text-black focus:outline-none ring-2 ring-gray-300 focus:ring-blue-500 resize-none flex-1"
+        className="px-2 py-2 rounded-md bg-white text-black focus:outline-none ring-2 ring-gray-300 focus:ring-blue-500 resize-none flex-1 no-drag"
       ></textarea>
       <button
         className="px-2 py-2 rounded-md bg-blue-500 hover:bg-blue-400 text-white flex gap-2 items-center"

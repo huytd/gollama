@@ -3,4 +3,8 @@
 
 export function GetClipboardText():Promise<string>;
 
+export function GetLLMConfig():Promise<string>;
+
+export function SetLLMConfig(arg1:string,arg2:string,arg3:string):Promise<void>;
+
 export function StartLLMStream(arg1:string):Promise<void>;
