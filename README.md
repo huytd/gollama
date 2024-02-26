@@ -11,6 +11,8 @@
 
 Gollama is a GUI application that allows you to quickly interact with OpenAI-compatible LLM API (like Ollama, OpenAI GPT,...).
 
+https://github.com/huytd/gollama/assets/613943/68f418ac-c248-4d0f-a3dc-55a079c45bcb
+
 ## Installation
 
 Currently, there is no prebuilt binary, so you have to build the app on your own machine.
