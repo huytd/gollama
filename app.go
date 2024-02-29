@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
+	"io"
+	"os"
 
 	"encoding/json"
 
@@ -28,15 +30,58 @@ func NewApp() *App {
 	return &App{}
 }
 
+var DefaultConfig = LLMConfig{
+	APIUrl:   "http://localhost:11434/v1",
+	APIModel: "mistral:latest",
+	APIKey:   "ollama",
+}
+
+func LoadUserConfig() LLMConfig {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return DefaultConfig
+	}
+	configFile := fmt.Sprintf("%s/.gollama.json", homeDir)
+	file, err := os.Open(configFile)
+	if err != nil {
+		return DefaultConfig
+	}
+	defer file.Close()
+	byteValue, err := io.ReadAll(file)
+	if err != nil {
+		return DefaultConfig
+	}
+	var config LLMConfig
+	err = json.Unmarshal(byteValue, &config)
+	if err != nil {
+		return DefaultConfig
+	}
+	return config
+}
+
+func SaveConfig(config LLMConfig) {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return
+	}
+	configFile := fmt.Sprintf("%s/.gollama.json", homeDir)
+	file, err := os.Create(configFile)
+	if err != nil {
+		return
+	}
+	defer file.Close()
+	byteValue, err := json.Marshal(config)
+	if err != nil {
+		return
+	}
+	file.Write(byteValue)
+}
+
 // startup is called when the app starts. The context is saved
 // so we can call the runtime methods
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
-	a.llmConfig = LLMConfig{
-		APIUrl:   "http://localhost:11434/v1",
-		APIModel: "mistral:latest",
-		APIKey:   "ollama",
-	}
+	a.llmConfig = LoadUserConfig()
 }
 
 func (a *App) GetLLMConfig() string {
@@ -52,6 +97,7 @@ func (a *App) SetLLMConfig(apiUrl string, apiKey string, apiModel string) {
 	a.llmConfig.APIUrl = apiUrl
 	a.llmConfig.APIKey = apiKey
 	a.llmConfig.APIModel = apiModel
+	SaveConfig(a.llmConfig)
 }
 
 // Greet returns a greeting for the given name
