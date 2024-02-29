@@ -109,27 +109,40 @@ func (a *App) GetClipboardText() string {
 	return string(clipboard.Read(clipboard.FmtText))
 }
 
-func (a *App) StartLLMStream(prompt string) {
+func (a *App) StartLLMStream(previousMessages []string, prompt string) {
 	config := openai.DefaultConfig(a.llmConfig.APIKey)
 	config.BaseURL = a.llmConfig.APIUrl
 	client := openai.NewClientWithConfig(config)
 
-	fmt.Println("Config", config.BaseURL)
+	messages := make([]openai.ChatCompletionMessage, len(previousMessages)+1)
+	for i, message := range previousMessages {
+		role := openai.ChatMessageRoleUser
+		if i != 0 && i%2 == 0 {
+			role = openai.ChatMessageRoleAssistant
+		}
+		messages[i] = openai.ChatCompletionMessage{
+			Role:    role,
+			Content: message,
+		}
+	}
+	messages[len(messages)-1] = openai.ChatCompletionMessage{
+		Role:    openai.ChatMessageRoleUser,
+		Content: prompt,
+	}
+
+	b, _ := json.MarshalIndent(messages, "", "  ")
+	fmt.Printf("MESSAGES: %+s\n", string(b))
 
 	req := openai.ChatCompletionRequest{
-		Model: a.llmConfig.APIModel,
-		Messages: []openai.ChatCompletionMessage{
-			{
-				Role:    openai.ChatMessageRoleUser,
-				Content: prompt,
-			},
-		},
-		Stream: true,
+		Model:    a.llmConfig.APIModel,
+		Messages: messages,
+		Stream:   true,
 	}
 
 	stream, err := client.CreateChatCompletionStream(a.ctx, req)
 	if err != nil {
 		fmt.Println("Ceate chat completion error", err)
+		runtime.EventsEmit(a.ctx, "answer-update", "Something went wrong, please try again later")
 		runtime.EventsEmit(a.ctx, "stream-done", "")
 		return
 	}

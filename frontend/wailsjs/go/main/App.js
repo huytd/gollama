@@ -14,6 +14,6 @@ export function SetLLMConfig(arg1, arg2, arg3) {
   return window['go']['main']['App']['SetLLMConfig'](arg1, arg2, arg3);
 }
 
-export function StartLLMStream(arg1) {
-  return window['go']['main']['App']['StartLLMStream'](arg1);
+export function StartLLMStream(arg1, arg2) {
+  return window['go']['main']['App']['StartLLMStream'](arg1, arg2);
 }

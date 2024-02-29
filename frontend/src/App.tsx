@@ -8,6 +8,9 @@ import { Link, useNavigate } from "react-router-dom";
 import { IconGear, IconPaste, IconTrashcan } from "./Icons";
 
 function App() {
+  const [previousConversation, setPreviousConversation] = useState(
+    [] as string[]
+  );
   const [clipboardText, setClipboardText] = useState("");
   const [promptText, setPromptText] = useState("");
   const [answer, setAnswer] = useState("");
@@ -40,7 +43,9 @@ function App() {
 
   useHotkeys("escape", () => {
     if (answer.length) {
+      setPreviousConversation((prev) => [...prev, promptText, answer]);
       setAnswer("");
+      setPromptText("");
     }
   });
 
@@ -52,8 +57,11 @@ function App() {
 
   const getLLMAnswer = () => {
     setWaiting(true);
-    const prompt = `${promptText}\nContext:\n"""\n${clipboardText}\n"""`;
-    StartLLMStream(prompt);
+    let prompt = promptText;
+    if (clipboardText.length) {
+      prompt = `${promptText}\nContext:\n"""\n${clipboardText}\n"""`;
+    }
+    StartLLMStream(previousConversation, prompt);
   };
 
   useEffect(() => {
@@ -65,18 +73,6 @@ function App() {
       }
     });
   }, []);
-
-  const prompts = [
-    {
-      title: "Fix spelling and grammar",
-    },
-    {
-      title: "Summarize this text",
-    },
-    {
-      title: "Translate to...",
-    },
-  ];
 
   if (isWaiting || answer.length) {
     return (
@@ -158,18 +154,6 @@ function App() {
         <span className="flex-1">Submit</span>
         <span className="w-10 opacity-0"></span>
       </button>
-      {prompts.map((prompt, index) => (
-        <button
-          className="px-2 py-2 rounded-md bg-gray-200 hover:bg-gray-100 text-gray-800 hover:text-gray-700 flex gap-2 items-center"
-          key={index}
-        >
-          <span className="bg-gray-300 px-2 py-1 text-xs rounded-md text-gray-500">
-            ⌘ {index + 1}
-          </span>
-          <span className="flex-1">{prompt.title}</span>
-          <span className="w-10 opacity-0"></span>
-        </button>
-      ))}
     </div>
   );
 }
