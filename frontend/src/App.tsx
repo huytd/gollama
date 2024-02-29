@@ -77,16 +77,23 @@ function App() {
   if (isWaiting || answer.length) {
     return (
       <div id="app">
-        {isWaiting ? (
-          <div className="px-2 py-2 rounded-md bg-white text-black focus:outline-none ring-2 ring-gray-300 focus:ring-blue-500 flex-grow overflow-y-auto flex justify-center items-center">
-            Thinking...
+        <div className="px-2 py-2 rounded-md bg-white text-black focus:outline-none ring-2 ring-gray-300 focus:ring-blue-500 flex-grow overflow-y-auto markdown no-drag">
+          {previousConversation.map((msg, index) => (
+            <div key={index}>
+              <b>{index > 0 && index % 2 == 0 ? "Asisstant" : "User"}:</b>&nbsp;
+              <Markdown>{msg}</Markdown>
+            </div>
+          ))}
+          <div>
+            <b>User:</b>&nbsp;
+            <Markdown>{promptText}</Markdown>
           </div>
-        ) : (
-          <div className="px-2 py-2 rounded-md bg-white text-black focus:outline-none ring-2 ring-gray-300 focus:ring-blue-500 flex-grow overflow-y-auto markdown no-drag">
-            <Markdown>{answer}</Markdown>
-            <span id="scroll-bottom-mark" ref={scrollBottomMark}></span>
+          <div>
+            <b>Assistant:</b>&nbsp;
+            <Markdown>{isWaiting ? "Thinking..." : answer}</Markdown>
           </div>
-        )}
+          <span id="scroll-bottom-mark" ref={scrollBottomMark}></span>
+        </div>
         <button
           className="px-2 py-2 rounded-md bg-gray-200 hover:bg-gray-100 text-gray-800 hover:text-gray-700 flex gap-2 items-center"
           onClick={() => setAnswer("")}
